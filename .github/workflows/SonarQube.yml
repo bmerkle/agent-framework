@@ -1,0 +1,36 @@
+name: SonarQube
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:     # manual run
+jobs:
+  sonarqube:
+    name: SonarQube
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v6
+        with:
+           args: >
+              -Dsonar.c.file.suffixes=-
+              -Dsonar.cpp.file.suffixes=-
+              -Dsonar.objc.file.suffixes=-
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_ARCHITECTURE_EXPORT_GRAPHS: true
+          SONAR_ARCHITECTURE_EXPORT_FLAVOR: true
+          SONAR_ARCHITECTURE_EXPORT_ISSUES: true
+      - name: ls
+        run: |
+          ls -lR .
+#      - name: Store dna xml & json files
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: ${{ github.event.repository.name }}-dna-scan-artifacts
+#          path: /home/runner/work/anchore-engine/anchore-engine/.scannerwork/architecture/exports/
